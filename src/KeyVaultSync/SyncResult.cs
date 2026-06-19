@@ -1,8 +1,8 @@
 namespace KeyVaultSync;
 
-public enum SyncAction { Added, Updated, Skipped, Failed }
+public enum SyncAction { Added, Updated, Skipped }
 
-public sealed record SyncEntry(string Key, string SecretName, SyncAction Action, string? Error = null);
+public sealed record SyncEntry(string DisplayKey, string SecretName, SyncAction Action);
 
 public sealed class SyncResult
 {
@@ -13,6 +13,4 @@ public sealed class SyncResult
     public void Add(SyncEntry entry) => _entries.Add(entry);
 
     public int Count(SyncAction action) => _entries.Count(e => e.Action == action);
-
-    public bool HasFailures => _entries.Any(e => e.Action == SyncAction.Failed);
 }
