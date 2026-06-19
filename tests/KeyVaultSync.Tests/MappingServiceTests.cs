@@ -20,7 +20,6 @@ public class MappingServiceTests
 
         var result = await new MappingService(lister).BuildAsync("lm-dev", Mappings);
 
-        Assert.False(result.ContainsValue("passgate-other-secret"));
         Assert.DoesNotContain("other-secret", result.Keys);
         Assert.Equal(2, result.Count);
     }

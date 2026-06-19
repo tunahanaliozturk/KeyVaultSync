@@ -6,7 +6,7 @@ public sealed class MappingService
 
     public MappingService(ISecretLister lister) => _lister = lister;
 
-    public async Task<SortedDictionary<string, string>> BuildAsync(
+    public async Task<IReadOnlyDictionary<string, string>> BuildAsync(
         string prefix,
         IReadOnlyDictionary<string, string> mappings,
         CancellationToken ct = default)
