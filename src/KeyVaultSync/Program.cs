@@ -81,7 +81,12 @@ static async Task<int> RunSync(string[] args)
             return 1;
         }
 
-        string valuesPath = GetArg(args, "--values") ?? "appsettings.json";
+        string? valuesPath = GetArg(args, "--values");
+        if (valuesPath is null)
+        {
+            Console.Error.WriteLine("Error: --values is required with --profile.");
+            return 1;
+        }
         if (!File.Exists(valuesPath))
         {
             Console.Error.WriteLine($"Error: values file not found: {valuesPath}");

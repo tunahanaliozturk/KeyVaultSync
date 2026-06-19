@@ -45,4 +45,11 @@ public class PrefixProfileTests : IDisposable
         WriteProfile("""{ "KeyVault": { "VaultUri": "https://x.vault.azure.net" } }""");
         Assert.Throws<InvalidOperationException>(() => PrefixProfile.Load(_path));
     }
+
+    [Fact]
+    public void Throws_when_prefix_is_whitespace()
+    {
+        WriteProfile("""{ "KeyVault": { "Prefix": "   " } }""");
+        Assert.Throws<InvalidOperationException>(() => PrefixProfile.Load(_path));
+    }
 }

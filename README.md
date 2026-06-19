@@ -53,7 +53,7 @@ in the same vault are never read, written, or deleted.
 
 Uses `DefaultAzureCredential`: locally `az login`; in CI/CD a managed identity or
 `AZURE_*` environment variables. The identity needs the **Key Vault Secrets Officer**
-role (and list permission for `mapping`).
+role, which includes the list permission used by `mapping`.
 
 ## Exit codes
 

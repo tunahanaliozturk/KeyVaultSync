@@ -62,4 +62,16 @@ public class PrefixSecretResolverTests
         Assert.Contains("sendgrid-apikey", r.MissingValue);
         Assert.DoesNotContain("partnercenter-clientsecret", r.MissingValue);
     }
+
+    [Fact]
+    public void Invalid_resulting_name_goes_to_invalid()
+    {
+        var mappings = new Dictionary<string, string> { ["bad_suffix"] = "Some:Key" };
+        var r = new PrefixSecretResolver("lm-dev", mappings)
+            .Resolve(new[] { new KeyValuePair<string, string>("Some:Key", "value") });
+
+        Assert.Contains("Some:Key", r.Invalid);
+        Assert.Empty(r.Planned);
+        Assert.DoesNotContain("bad_suffix", r.MissingValue);
+    }
 }
