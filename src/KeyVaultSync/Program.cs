@@ -229,7 +229,15 @@ static async Task<int> RunMapping(string[] args)
 
     if (reportPath is not null)
     {
-        await File.WriteAllTextAsync(reportPath, json);
+        try
+        {
+            await File.WriteAllTextAsync(reportPath, json);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Console.Error.WriteLine($"Error: could not write report to {reportPath}: {ex.Message}");
+            return 1;
+        }
         Console.Error.WriteLine($"Wrote {mapping.Count} entries to {reportPath}");
     }
     else
