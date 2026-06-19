@@ -3,7 +3,7 @@ using Azure.Security.KeyVault.Secrets;
 
 namespace KeyVaultSync;
 
-public sealed class KeyVaultSecretStore : ISecretStore
+public sealed class KeyVaultSecretStore : ISecretStore, ISecretLister
 {
     private readonly SecretClient _client;
 
@@ -24,4 +24,14 @@ public sealed class KeyVaultSecretStore : ISecretStore
 
     public Task SetValueAsync(string name, string value, CancellationToken ct = default)
         => _client.SetSecretAsync(name, value, ct);
+
+    public async Task<IReadOnlyList<string>> ListNamesAsync(CancellationToken ct = default)
+    {
+        var names = new List<string>();
+        await foreach (var prop in _client.GetPropertiesOfSecretsAsync(ct))
+        {
+            names.Add(prop.Name);
+        }
+        return names;
+    }
 }
