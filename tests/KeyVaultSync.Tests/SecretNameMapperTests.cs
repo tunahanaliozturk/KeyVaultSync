@@ -32,4 +32,22 @@ public class SecretNameMapperTests
     {
         Assert.Throws<ArgumentException>(() => SecretNameMapper.ToSecretName(configKey));
     }
+
+    [Fact]
+    public void ToConfigKey_leaves_single_hyphen_unchanged()
+    {
+        Assert.Equal("my-secret", SecretNameMapper.ToConfigKey("my-secret"));
+    }
+
+    [Fact]
+    public void IsValid_accepts_name_at_max_length_127()
+    {
+        Assert.True(SecretNameMapper.IsValid(new string('a', 127)));
+    }
+
+    [Fact]
+    public void IsValid_rejects_name_over_max_length()
+    {
+        Assert.False(SecretNameMapper.IsValid(new string('a', 128)));
+    }
 }

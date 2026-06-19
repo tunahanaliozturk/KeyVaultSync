@@ -66,4 +66,20 @@ public class KeyVaultSyncServiceTests
         Assert.Equal(1, result.Count(SyncAction.Added));
         Assert.Contains("Good", store.Writes);
     }
+
+    [Fact]
+    public async Task Propagates_non_argument_exception_from_store()
+    {
+        var service = new KeyVaultSyncService(new ThrowingSecretStore());
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.SyncAsync(new[] { new KeyValuePair<string, string>("Key", "value") }));
+    }
+
+    private sealed class ThrowingSecretStore : ISecretStore
+    {
+        public Task<string?> GetValueAsync(string name, CancellationToken ct = default)
+            => throw new InvalidOperationException("boom");
+        public Task SetValueAsync(string name, string value, CancellationToken ct = default)
+            => Task.CompletedTask;
+    }
 }
