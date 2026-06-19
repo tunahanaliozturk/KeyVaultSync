@@ -42,13 +42,15 @@ catch (System.Text.Json.JsonException ex)
     return 1;
 }
 
+var resolution = new FlattenSecretResolver().Resolve(pairs);
+
 var client = new SecretClient(new Uri(vault), new DefaultAzureCredential());
 var service = new KeyVaultSyncService(new KeyVaultSecretStore(client));
 
 SyncResult result;
 try
 {
-    result = await service.SyncAsync(pairs);
+    result = await service.SyncAsync(resolution.Planned);
 }
 catch (AuthenticationFailedException ex)
 {
@@ -70,20 +72,17 @@ catch (RequestFailedException ex)
 }
 
 foreach (var e in result.Entries)
-{
-    var line = e.Action == SyncAction.Failed
-        ? $"  FAILED  {e.Key} -> {e.Error}"
-        : $"  {e.Action,-7} {e.Key}";
-    Console.WriteLine(line);
-}
+    Console.WriteLine($"  {e.Action,-7} {e.SecretName}");
+foreach (var key in resolution.Invalid)
+    Console.WriteLine($"  INVALID {key}");
 
 Console.WriteLine(
     $"\nDone. Added: {result.Count(SyncAction.Added)}, " +
     $"Updated: {result.Count(SyncAction.Updated)}, " +
     $"Skipped: {result.Count(SyncAction.Skipped)}, " +
-    $"Failed: {result.Count(SyncAction.Failed)}");
+    $"Invalid: {resolution.Invalid.Count}");
 
-return result.HasFailures ? 2 : 0;
+return resolution.Invalid.Count > 0 ? 2 : 0;
 
 static string? GetArg(string[] args, string name)
 {

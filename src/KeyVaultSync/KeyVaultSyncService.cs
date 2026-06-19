@@ -7,38 +7,27 @@ public sealed class KeyVaultSyncService
     public KeyVaultSyncService(ISecretStore store) => _store = store;
 
     public async Task<SyncResult> SyncAsync(
-        IEnumerable<KeyValuePair<string, string>> pairs,
+        IReadOnlyList<PlannedSecret> planned,
         CancellationToken ct = default)
     {
         var result = new SyncResult();
 
-        foreach (var (key, value) in pairs)
+        foreach (var p in planned)
         {
-            string secretName;
-            try
-            {
-                secretName = SecretNameMapper.ToSecretName(key);
-            }
-            catch (ArgumentException ex)
-            {
-                result.Add(new(key, key, SyncAction.Failed, ex.Message));
-                continue;
-            }
-
-            var existing = await _store.GetValueAsync(secretName, ct);
+            var existing = await _store.GetValueAsync(p.SecretName, ct);
             if (existing is null)
             {
-                await _store.SetValueAsync(secretName, value, ct);
-                result.Add(new(key, secretName, SyncAction.Added));
+                await _store.SetValueAsync(p.SecretName, p.Value, ct);
+                result.Add(new(p.DisplayKey, p.SecretName, SyncAction.Added));
             }
-            else if (existing != value)
+            else if (existing != p.Value)
             {
-                await _store.SetValueAsync(secretName, value, ct);
-                result.Add(new(key, secretName, SyncAction.Updated));
+                await _store.SetValueAsync(p.SecretName, p.Value, ct);
+                result.Add(new(p.DisplayKey, p.SecretName, SyncAction.Updated));
             }
             else
             {
-                result.Add(new(key, secretName, SyncAction.Skipped));
+                result.Add(new(p.DisplayKey, p.SecretName, SyncAction.Skipped));
             }
         }
 
